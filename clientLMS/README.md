@@ -1,8 +1,11 @@
-# React + Vite
+This is a Learning Management System(LMS) I am making as my Campus project work. Hoping to learn many new things in coming days.
+At first open the working directory with integrated terminal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+run command **npm create vite@latest**<br/>
+type y<br/>
+provide the product name<br/>
+select react and javascript<br/>
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+now change the directory to created folder<br/>
+install node modules with **npm install**<br/>
+then try running your program through **npm run dev** command<br/>
