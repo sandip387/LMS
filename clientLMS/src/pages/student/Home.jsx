@@ -1,9 +1,11 @@
-import React from 'react'
-
+import React from "react";
+import Hero from "../../components/student/Hero.jsx";
 const Home = () => {
   return (
-    <div>Home</div>
-  )
-}
+    <div className="flex flex-col items-center space-y-7 text-center">
+      <Hero />
+    </div>
+  );
+};
 
-export default Home
+export default Home;
