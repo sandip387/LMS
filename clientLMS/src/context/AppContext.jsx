@@ -15,6 +15,13 @@ export const AppContextProvider = (props) => {
     setAllCourses(dummyCourses);
   };
 
+  //function to calculate avg rating of course
+  const calculateRating = (course) => {
+    if (course.courseRatings.length === 0) {
+      return 0;
+    }
+  };
+
   useEffect(() => {
     fetchAllCourse();
   }, []);
