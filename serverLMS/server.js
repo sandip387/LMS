@@ -17,7 +17,9 @@ app.get('/', (req, res) => {
     res.send("API Working");
 })
 
-app.post('/clerk', express.json(), clerkWebhooks)
+app.use(express.json()); // globally parse JSON
+app.post('/clerk', clerkWebhooks);
+
 
 //Port
 const PORT = process.env.PORT || 5000;
