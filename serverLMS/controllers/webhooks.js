@@ -6,13 +6,13 @@ import User from "../models/User.js";
 export const clerkWebhooks = async (req, res) => {
     try {
         const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
-        await whook.verify(payloadString, {
+        await whook.verify(JSON.stringify(req.body), {
             "svix-id": req.headers["svix-id"],
             "svix-timestamp": req.headers["svix-timestamp"],
             "svix-signature": req.headers["svix-signature"]
         })
 
-        const { data, type } = JSON.parse(payloadString);
+        const { data, type } = req.body;
 
         switch (type) {
             case 'user.created': {
@@ -45,8 +45,10 @@ export const clerkWebhooks = async (req, res) => {
             }
 
             default:
+                console.log(`Unhandled event type: ${type}`);
                 break;
         }
+        res.status(200).json({ success: true });
     } catch (error) {
         console.error("Webhook verification or DB action failed:", error);
         res.status(400).json({ success: false, message: error.message });
