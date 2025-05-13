@@ -758,3 +758,30 @@ export const dummyCourses = [
         "courseThumbnail": "https://img.youtube.com/vi/WbV3zRgpw_E/maxresdefault.jpg"
     }
 ]
+
+
+// const test = {
+//     "courseTitle": "Test Course Title",
+//     "courseDescription": "Test Course Description",
+//     "coursePrice": 99.99,
+//     "discount": 25,
+//     "courseContent": [
+//         {
+//             "chapterId": "ch01",
+//             "chapterOrder": 1,
+//             "chapterTitle": "Test Chapter Title",
+//             "chapterContent": [
+//                 {
+//                     "lectureId": "lec01",
+//                     "lectureTitle": "Test Lecture Title",
+//                     "lectureDuration": 20,
+//                     "lectureUrl": "https://example.com/lectures/lec01.mp4",
+//                     "isPreviewFree": true,
+//                     "lectureOrder": 1
+//                 },
+//             ]
+//         },
+//     ],
+// }
+
+
