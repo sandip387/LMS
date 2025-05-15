@@ -1,4 +1,7 @@
 import Course from "../models/Course.js";
+import { Purchase } from "../models/Purchase.js";
+import User from './../models/User.js';
+import Stripe from "stripe";
 
 //Get All Courses
 export const getAllCourse = async (req, res) => {
@@ -30,6 +33,36 @@ export const getCourseId = async (req, res) => {
         res.json({ success: true, courseData })
     } catch (error) {
         res.json({ success: false, message: error.message })
+
+    }
+}
+
+//Purchase Course
+export const purchaseCourse = async (req, res) => {
+    try {
+        const { courseId } = req.body;
+        const { origin } = req.headers;
+        const userId = req.auth.userId;
+        const userData = await User.findById(userId)
+        const courseData = await Course.findById(courseId)
+
+        if (!userData || !courseData) {
+            return res.json({ success: false, message: 'Data Not Found' })
+        }
+
+        const purchaseData = {
+            courseId: courseData._id,
+            userId,
+            amount: (courseData.coursePrice - courseData.discount * courseData.coursePrice / 100).toFixed(2),
+        }
+
+        const newPurchase = await Purchase.create(purchaseData)
+
+        //Stripe Gateway Initialize
+        const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
+
+       
+    } catch (error) {
 
     }
 }
