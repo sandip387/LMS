@@ -3,6 +3,7 @@ import { AppContext } from "../../context/AppContext";
 import Footer from "./../../components/student/Footer";
 import { Line } from "rc-progress";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const MyEnrollments = () => {
   const {

@@ -7,6 +7,7 @@ import humanizeDuration from "humanize-duration";
 import Footer from "./../../components/student/Footer";
 import YouTube from "react-youtube";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -55,7 +56,7 @@ const CourseDetails = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/purchase",
         { courseId: courseData._id },
-        { header: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (data.success) {

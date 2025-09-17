@@ -2,14 +2,28 @@ import React from "react";
 import { useContext, useState, useEffect } from "react";
 import { AppContext } from "./../../context/AppContext";
 import Loading from "./../../components/student/Loading";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const MyCourses = () => {
-  const { currency, allCourses } = useContext(AppContext);
-
+  const { currency, backendUrl, getToken, allCourses } = useContext(AppContext);
   const [courses, setCourses] = useState(null);
 
   const fetchEducatorCourses = async () => {
-    setCourses(allCourses);
+    try {
+      const token = await getToken();
+      const { data } = await axios.get(backendUrl + "/api/educator/courses", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (data.success) {
+        setCourses(data.courses);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
@@ -56,8 +70,12 @@ const MyCourses = () => {
                           (course.discount * course.coursePrice) / 100)
                     )}
                   </td>
-                  <td className="px-4 py-3">{course.enrolledStudents.length}</td>
-                  <td className="px-4 py-3">{new Date(course.createdAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-3">
+                    {course.enrolledStudents.length}
+                  </td>
+                  <td className="px-4 py-3">
+                    {new Date(course.createdAt).toLocaleDateString()}
+                  </td>
                 </tr>
               ))}
             </tbody>

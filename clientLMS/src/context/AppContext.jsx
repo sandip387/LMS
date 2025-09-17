@@ -26,7 +26,7 @@ export const AppContextProvider = (props) => {
     try {
       const { data } = await axios.get(backendUrl + "/api/course/all");
       if (data.success) {
-        setAllCourses(data.course);
+        setAllCourses(data.courses);
       } else {
         toast.error(data.message);
       }

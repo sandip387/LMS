@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import uniqid from "uniqid";
 import Quill from "quill";
 import { assets } from "../../assets/assets";
+import { AppContext } from "../../context/AppContext";
 
 const AddCourse = () => {
   const quillRef = useRef(null);
@@ -20,6 +21,7 @@ const AddCourse = () => {
     lectureUrl: "",
     isPreviewFree: false,
   });
+  const { backendUrl, getToken, navigate } = useContext(AppContext);
 
   const handleChapter = (action, chapterId) => {
     if (action === "add") {
@@ -36,7 +38,9 @@ const AddCourse = () => {
         setChapters([...chapters, newChapter]);
       }
     } else if (action === "remove") {
-      setChapters(chapters.filter((chapter) => chapter.chapterId !== chapterId));
+      setChapters(
+        chapters.filter((chapter) => chapter.chapterId !== chapterId)
+      );
     } else if (action === "toggle") {
       setChapters(
         chapters.map((chapter) =>
@@ -92,6 +96,43 @@ const AddCourse = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    try {
+      const token = await getToken();
+      const formData = new FormData();
+
+      const courseData = {
+        courseTitle,
+        courseDescription: quillRef.current.root.innerHTML,
+        coursePrice: Number(coursePrice),
+        discount: Number(discount),
+        courseContent: chapters,
+        isPublished: true,
+      };
+
+      formData.append("courseData", JSON.stringify(courseData));
+      if (image) formData.append("courseThumbnail", image);
+
+      const { data } = await axios.post(
+        backendUrl + "/api/educator/create-course",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            // "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        navigate("/educator/my-course");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
