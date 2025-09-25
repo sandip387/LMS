@@ -1,68 +1,103 @@
 import Course from "../models/Course.js";
 import { Purchase } from "../models/Purchase.js";
-import User from './../models/User.js';
+import User from "./../models/User.js";
 import Stripe from "stripe";
 
 //Get All Courses
 export const getAllCourse = async (req, res) => {
-    try {
-        const courses = await Course.find({ isPublished: true }).select(['-courseContent', '-enrolledStudents']).populate({ path: 'educator' })
+  try {
+    const courses = await Course.find({ isPublished: true })
+      .select(["-courseContent", "-enrolledStudents"])
+      .populate({ path: "educator" });
 
-        res.json({ success: true, courses })
-    } catch (error) {
-        res.json({ sucess: false, message: error.message })
-
-    }
-}
+    res.json({ success: true, courses });
+  } catch (error) {
+    res.json({ sucess: false, message: error.message });
+  }
+};
 
 //Get Course by Id
 export const getCourseId = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const courseData = await Course.findById(id).populate({ path: 'educator' })
+  const { id } = req.params;
+  try {
+    const courseData = await Course.findById(id).populate({ path: "educator" });
 
-        //Remove lectureUrl if isPreviewFree is false
-        courseData.courseContent.forEach(chapter => {
-            chapter.chapterContent.forEach(lecture => {
-                if (!lecture.isPreviewFree) {
-                    lecture.lectureUrl = "";
-                }
-            })
-        })
+    //Remove lectureUrl if isPreviewFree is false
+    courseData.courseContent.forEach((chapter) => {
+      chapter.chapterContent.forEach((lecture) => {
+        if (!lecture.isPreviewFree) {
+          lecture.lectureUrl = "";
+        }
+      });
+    });
 
-        res.json({ success: true, courseData })
-    } catch (error) {
-        res.json({ success: false, message: error.message })
-
-    }
-}
+    res.json({ success: true, courseData });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
 
 //Purchase Course
 export const purchaseCourse = async (req, res) => {
-    try {
-        const { courseId } = req.body;
-        const { origin } = req.headers;
-        const userId = req.auth.userId;
-        const userData = await User.findById(userId)
-        const courseData = await Course.findById(courseId)
+  try {
+    const { courseId } = req.body;
+    const { origin } = req.headers;
+    const userId = req.auth.userId;
 
-        if (!userData || !courseData) {
-            return res.json({ success: false, message: 'Data Not Found' })
-        }
+    const userData = await User.findById(userId);
+    const courseData = await Course.findById(courseId);
 
-        const purchaseData = {
-            courseId: courseData._id,
-            userId,
-            amount: (courseData.coursePrice - courseData.discount * courseData.coursePrice / 100).toFixed(2),
-        }
-
-        const newPurchase = await Purchase.create(purchaseData)
-
-        //Stripe Gateway Initialize
-        const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
-
-       
-    } catch (error) {
-
+    if (!userData || !courseData) {
+      return res.json({ success: false, message: "Data Not Found" });
     }
-}
+
+    if (userData.enrolledCourses.includes(courseId)) {
+      return res.json({ success: false, message: "Course already purchased" });
+    }
+
+    const purchaseData = {
+      courseId: courseData._id,
+      userId,
+      amount: (
+        courseData.coursePrice -
+        (courseData.discount * courseData.coursePrice) / 100
+      ).toFixed(2),
+    };
+
+    const newPurchase = await Purchase.create(purchaseData);
+
+    // Stripe Gateway Initialize
+    const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const currency = process.env.CURRENCY?.toLowerCase() || "usd";
+
+    // Creating line items for Stripe
+    const line_items = [
+      {
+        price_data: {
+          currency,
+          product_data: {
+            name: courseData.courseTitle,
+            description: courseData.courseDescription?.substring(0, 100) || "",
+          },
+          unit_amount: Math.round(newPurchase.amount * 100),
+        },
+        quantity: 1,
+      },
+    ];
+
+    const session = await stripeInstance.checkout.sessions.create({
+      success_url: `${origin}/loading/my-enrollments`,
+      cancel_url: `${origin}/course/${courseId}`,
+      line_items: line_items,
+      mode: "payment",
+      metadata: {
+        purchaseId: newPurchase._id.toString(),
+      },
+    });
+
+    res.json({ success: true, session_url: session.url });
+  } catch (error) {
+    console.error("Purchase error:", error);
+    res.json({ success: false, message: error.message });
+  }
+};
