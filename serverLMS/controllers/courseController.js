@@ -12,7 +12,7 @@ export const getAllCourse = async (req, res) => {
 
     res.json({ success: true, courses });
   } catch (error) {
-    res.json({ sucess: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 

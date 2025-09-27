@@ -29,12 +29,14 @@ export const addCourse = async (req, res) => {
     const educatorId = req.auth.userId;
 
     if (!imageFile) {
-      return res.json({ success: false, message: "Thumbnail Not Attached" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Thumbnail Not Attached" });
     }
 
     const parsedCourseData = await JSON.parse(courseData);
     if (!parsedCourseData.courseTitle || !parsedCourseData.coursePrice) {
-      return res.json({
+      return res.status(400).json({
         success: false,
         message: "Course title and price are required",
       });
@@ -47,9 +49,10 @@ export const addCourse = async (req, res) => {
     newCourse.courseThumbnail = imageUpload.secure_url;
     await newCourse.save();
 
-    res.json({ success: true, message: "Course Added" });
+    res.status(201).json({ success: true, message: "Course Added" });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    console.error("Error in addCourse:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
